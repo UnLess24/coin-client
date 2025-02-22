@@ -30,7 +30,7 @@ func main() {
 	}()
 
 	db := database.NewFake()
-	srv := server.New(fmt.Sprintf("%v:%v", cfg.Server.Host, cfg.Server.Port), db)
+	srv := server.New(fmt.Sprintf("%v:%v", cfg.Server.Host, cfg.Server.Port), db, cfg)
 
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {

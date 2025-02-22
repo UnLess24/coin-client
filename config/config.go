@@ -8,6 +8,7 @@ type Config struct {
 	DB             DB
 	Server         Server
 	MigrationsPath string
+	JWTSecretKey   string
 }
 
 type DB struct {
@@ -48,5 +49,6 @@ func MustRead() *Config {
 			Password: viper.GetString("db.password"),
 		},
 		MigrationsPath: viper.GetString("migrations.path"),
+		JWTSecretKey:   viper.GetString("jwt.secret"),
 	}
 }

@@ -5,6 +5,6 @@ import (
 )
 
 type DB interface {
-	FindUserByEmail(email string) (user.User, error)
+	FindUserByEmail(email, pass string) (user.User, error)
 	CreateUser(user user.User) error
 }
