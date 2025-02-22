@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/UnLess24/coin/client/config"
+	"github.com/UnLess24/coin/client/internal/database"
 	"github.com/UnLess24/coin/client/internal/server"
 	"golang.org/x/sync/errgroup"
 )
@@ -28,7 +29,8 @@ func main() {
 		<-c
 	}()
 
-	srv := server.New(fmt.Sprintf("%v:%v", cfg.Server.Host, cfg.Server.Port))
+	db := database.NewFake()
+	srv := server.New(fmt.Sprintf("%v:%v", cfg.Server.Host, cfg.Server.Port), db)
 
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {

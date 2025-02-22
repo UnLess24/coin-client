@@ -3,20 +3,26 @@ package server
 import (
 	"net/http"
 
+	"github.com/UnLess24/coin/client/internal/database"
+	"github.com/UnLess24/coin/client/internal/server/handler"
 	"github.com/gin-gonic/gin"
 )
 
-func New(addr string) *http.Server {
+type Server struct {
+	*http.Server
+	DB database.DB
+}
+
+func New(addr string, db database.DB) *Server {
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	r.GET("/healthcheck", handler.HealthCheck)
 
-	return &http.Server{
-		Addr:    addr,
-		Handler: r,
+	return &Server{
+		Server: &http.Server{
+			Addr:    addr,
+			Handler: r,
+		},
+		DB: db,
 	}
 }
