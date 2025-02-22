@@ -21,8 +21,9 @@ type DB struct {
 	Password string
 }
 type Server struct {
-	Host string
-	Port string
+	Host        string
+	Port        string
+	ReleaseMode bool
 }
 
 func MustRead() *Config {
@@ -36,8 +37,9 @@ func MustRead() *Config {
 	}
 	return &Config{
 		Server: Server{
-			Host: viper.GetString("server.host"),
-			Port: viper.GetString("server.port"),
+			Host:        viper.GetString("server.host"),
+			Port:        viper.GetString("server.port"),
+			ReleaseMode: viper.GetBool("server.release_mode"),
 		},
 		DB: DB{
 			Name:     viper.GetString("db.name"),

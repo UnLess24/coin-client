@@ -14,7 +14,7 @@ import (
 
 var errBadCredentials = "user or password is incorrect"
 
-func Login(db database.DB, jwtSK string) gin.HandlerFunc {
+func Login(db database.DB, JWTSecreteKey []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := dto.LoginRequest{}
 		if err := c.BindJSON(&req); err != nil {
@@ -38,13 +38,13 @@ func Login(db database.DB, jwtSK string) gin.HandlerFunc {
 		// Генерируем полезные данные, которые будут храниться в токене
 		payload := jwt.MapClaims{
 			"sub": u.Email,
-			"exp": time.Now().Add(time.Hour * 72).Unix(),
+			"exp": time.Now().Add(time.Hour * 24).Unix(),
 		}
 
 		// Создаем новый JWT-токен и подписываем его по алгоритму HS256
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
-		t, err := token.SignedString([]byte(jwtSK))
+		t, err := token.SignedString(JWTSecreteKey)
 		if err != nil {
 			slog.Error("JWT token signing", "errorMessage", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
