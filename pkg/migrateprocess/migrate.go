@@ -24,7 +24,7 @@ func MustProcess(args []string, cfg *config.Config) {
 
 	driver := mustDBDriver(db)
 
-	m := mustMigrate(cfg.DB.Name, driver)
+	m := mustMigrate(cfg.DB.Name, cfg.MigrationsPath, driver)
 	defer m.Close()
 
 	var err error
@@ -73,8 +73,8 @@ func mustDBDriver(db *sql.DB) database.Driver {
 	return driver
 }
 
-func mustMigrate(name string, driver database.Driver) *migrate.Migrate {
-	m, err := migrate.NewWithDatabaseInstance("file://migrations", name, driver)
+func mustMigrate(name, path string, driver database.Driver) *migrate.Migrate {
+	m, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%v", path), name, driver)
 	if err != nil {
 		panic(fmt.Errorf("migration source path error %w", err))
 	}

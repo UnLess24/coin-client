@@ -5,8 +5,9 @@ import (
 )
 
 type Config struct {
-	DB     DB
-	Server Server
+	DB             DB
+	Server         Server
+	MigrationsPath string
 }
 
 type DB struct {
@@ -46,5 +47,6 @@ func MustRead() *Config {
 			User:     viper.GetString("db.user"),
 			Password: viper.GetString("db.password"),
 		},
+		MigrationsPath: viper.GetString("migrations.path"),
 	}
 }
