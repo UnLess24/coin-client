@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"net/mail"
 
 	"github.com/UnLess24/coin/client/internal/database"
 	"github.com/UnLess24/coin/client/internal/dto"
@@ -15,6 +16,13 @@ func Register(db database.DB) gin.HandlerFunc {
 		if err := c.BindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"errorMessage": "invalid request",
+			})
+			return
+		}
+
+		if _, err := mail.ParseAddress(req.Email); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errorMessage": "invalid email",
 			})
 			return
 		}

@@ -52,3 +52,7 @@ func (f *FakeDB) CreateUser(user user.User) error {
 
 	return nil
 }
+
+func (f *FakeDB) Close() error {
+	return nil
+}

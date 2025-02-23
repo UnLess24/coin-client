@@ -5,7 +5,7 @@ up:
 	docker-compose up -d
 
 down:
-	docker-compose down -rmi local
+	docker-compose down --rmi local
 
 create:
 	migrate create -ext sql -dir migrations ${n}

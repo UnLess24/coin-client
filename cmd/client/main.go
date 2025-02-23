@@ -29,7 +29,12 @@ func main() {
 		<-c
 	}()
 
-	db := database.NewFake()
+	db, err := database.NewPGDB(cfg)
+	if err != nil {
+		slog.Error("failed to connect to database", "error", err)
+		return
+	}
+	defer db.Close()
 	srv := server.New(fmt.Sprintf("%v:%v", cfg.Server.Host, cfg.Server.Port), db, cfg)
 
 	g, gCtx := errgroup.WithContext(ctx)
