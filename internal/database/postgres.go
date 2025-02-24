@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -24,35 +25,35 @@ func NewPGDB(cfg *config.Config) (*PGDB, error) {
 	return &PGDB{db: db}, nil
 }
 
-func (p *PGDB) FindUserByEmail(email, pass string) (user.User, error) {
+func (p *PGDB) FindUserByEmail(ctx context.Context, email, pass string) (user.User, error) {
 	var u user.User
-	err := p.db.Get(&u, "SELECT * FROM users WHERE email=$1", email)
+	err := p.db.GetContext(ctx, &u, "SELECT * FROM users WHERE email=$1", email)
 	if err != nil {
 		slog.Error("failed to find user by email", "error", err)
-		return user.User{}, fmt.Errorf("user or password is incorrect")
+		return user.User{}, ErrEmailOrPasswordIsIncorrect
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pass))
 	if err != nil {
 		slog.Error("failed to user password", "error", err)
-		return user.User{}, fmt.Errorf("user or password is incorrect")
+		return user.User{}, ErrEmailOrPasswordIsIncorrect
 	}
 
 	return u, nil
 }
 
-func (p *PGDB) CreateUser(user user.User) error {
+func (p *PGDB) CreateUser(ctx context.Context, user user.User) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		slog.Error("failed to generate hash user password", "error", err)
-		return fmt.Errorf("failed to hash password")
+		return ErrEmailOrPasswordIsIncorrect
 	}
 	user.Password = string(hash)
 
-	_, err = p.db.Exec("INSERT INTO users (email, password) VALUES ($1, $2)", user.Email, user.Password)
+	_, err = p.db.ExecContext(ctx, "INSERT INTO users (email, password) VALUES ($1, $2)", user.Email, user.Password)
 	if err != nil {
 		slog.Error("failed to insert user into db", "error", err)
-		return fmt.Errorf("%s", ErrUserAlreadyExists)
+		return ErrUserAlreadyExists
 	}
 
 	return nil

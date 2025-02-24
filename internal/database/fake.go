@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"context"
 	"sync"
 
 	"github.com/UnLess24/coin/client/internal/models/user"
@@ -18,41 +18,71 @@ func NewFake() *FakeDB {
 	}
 }
 
-func (f *FakeDB) FindUserByEmail(email, pass string) (user.User, error) {
+func (f *FakeDB) FindUserByEmail(ctx context.Context, email, pass string) (user.User, error) {
+	err := proceedWithCheckContext(ctx, func() error {
+		return nil
+	})
+	if err != nil {
+		return user.User{}, err
+	}
+
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
 	u, ok := f.store[email]
 	if !ok {
-		return user.User{}, fmt.Errorf("user or password is incorrect")
+		return user.User{}, ErrEmailOrPasswordIsIncorrect
 	}
 
 	if u.Password != pass {
-		return user.User{}, fmt.Errorf("user or password is incorrect")
+		return user.User{}, ErrEmailOrPasswordIsIncorrect
 	}
 
 	return u, nil
 }
 
-func (f *FakeDB) CreateUser(user user.User) error {
-	if user.Email == "" || user.Password == "" {
-		return fmt.Errorf("email or password is incorrect")
+func (f *FakeDB) CreateUser(ctx context.Context, user user.User) error {
+	err := proceedWithCheckContext(ctx, func() error {
+		if user.Email == "" || user.Password == "" {
+			return ErrEmailOrPasswordIsIncorrect
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
-	f.mu.RLock()
-	_, ok := f.store[user.Email]
-	f.mu.RUnlock()
-	if ok {
-		return fmt.Errorf("%s", ErrUserAlreadyExists)
+	err = proceedWithCheckContext(ctx, func() error {
+		f.mu.RLock()
+		_, ok := f.store[user.Email]
+		f.mu.RUnlock()
+		if ok {
+			return ErrUserAlreadyExists
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
-	f.mu.Lock()
-	defer f.mu.Unlock()
-	f.store[user.Email] = user
+	return proceedWithCheckContext(ctx, func() error {
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		f.store[user.Email] = user
 
-	return nil
+		return nil
+	})
 }
 
 func (f *FakeDB) Close() error {
 	return nil
+}
+
+func proceedWithCheckContext(ctx context.Context, fn func() error) error {
+	select {
+	case <-ctx.Done():
+		return ErrContextIsCanceled
+	default:
+		return fn()
+	}
 }

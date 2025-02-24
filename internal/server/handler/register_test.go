@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -112,6 +113,31 @@ func TestRegister(t *testing.T) {
 		r.ServeHTTP(res, httptest.NewRequest("POST", "/register", rdr))
 
 		expected := fmt.Sprintf(`{"errorMessage":"%s"}`, database.ErrUserAlreadyExists)
+		if res.Body.String() != expected {
+			t.Errorf("expected %s, got %s", expected, res.Body.String())
+		}
+
+		if res.Code != http.StatusBadRequest {
+			t.Errorf("expected status code 400, got %d", res.Code)
+		}
+	})
+
+	t.Run("context is canceled", func(t *testing.T) {
+		db := database.NewFake()
+
+		res := httptest.NewRecorder()
+
+		_, r := gin.CreateTestContext(res)
+		r.POST("/register", Register(db))
+
+		rdr := bytes.NewReader([]byte(`{"email":"test@test.ru", "password":"password"}`))
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+
+		req := httptest.NewRequestWithContext(ctx, "POST", "/register", rdr)
+		r.ServeHTTP(res, req)
+
+		expected := fmt.Sprintf(`{"errorMessage":"%s"}`, database.ErrContextIsCanceled)
 		if res.Body.String() != expected {
 			t.Errorf("expected %s, got %s", expected, res.Body.String())
 		}

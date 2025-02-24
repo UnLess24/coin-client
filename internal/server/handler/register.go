@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"net/mail"
+	"time"
 
 	"github.com/UnLess24/coin/client/internal/database"
 	"github.com/UnLess24/coin/client/internal/dto"
@@ -21,19 +22,21 @@ func Register(db database.DB) gin.HandlerFunc {
 		req := dto.RegisterRequest{}
 		if err := c.BindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"errorMessage": fmt.Sprintf("%s", invalidRequest),
+				"errorMessage": invalidRequest,
 			})
 			return
 		}
 
 		if _, err := mail.ParseAddress(req.Email); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"errorMessage": fmt.Sprintf("%s", invalidEmail),
+				"errorMessage": invalidEmail,
 			})
 			return
 		}
 
-		err := db.CreateUser(user.FromRegisterRequest(req))
+		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*5)
+		defer cancel()
+		err := db.CreateUser(ctx, user.FromRegisterRequest(req))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"errorMessage": err.Error(),

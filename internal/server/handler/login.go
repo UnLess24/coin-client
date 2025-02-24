@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"time"
@@ -24,10 +25,12 @@ func Login(db database.DB, JWTSecreteKey []byte) gin.HandlerFunc {
 			return
 		}
 
-		u, err := db.FindUserByEmail(req.Email, req.Password)
+		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*5)
+		defer cancel()
+		u, err := db.FindUserByEmail(ctx, req.Email, req.Password)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"errorMessage": errBadCredentials,
+				"errorMessage": err.Error(),
 			})
 			return
 		}
