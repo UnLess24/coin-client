@@ -43,7 +43,7 @@ func (f *FakeDB) CreateUser(user user.User) error {
 	_, ok := f.store[user.Email]
 	f.mu.RUnlock()
 	if ok {
-		return fmt.Errorf("user already exists")
+		return fmt.Errorf("%s", ErrUserAlreadyExists)
 	}
 
 	f.mu.Lock()

@@ -52,7 +52,7 @@ func (p *PGDB) CreateUser(user user.User) error {
 	_, err = p.db.Exec("INSERT INTO users (email, password) VALUES ($1, $2)", user.Email, user.Password)
 	if err != nil {
 		slog.Error("failed to insert user into db", "error", err)
-		return fmt.Errorf("failed to create user")
+		return fmt.Errorf("%s", ErrUserAlreadyExists)
 	}
 
 	return nil

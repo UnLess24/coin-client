@@ -45,8 +45,8 @@ func Login(db database.DB, JWTSecreteKey []byte) gin.HandlerFunc {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
 		t, err := token.SignedString(JWTSecreteKey)
-		if err != nil {
-			slog.Error("JWT token signing", "errorMessage", err)
+		if err != nil || len(JWTSecreteKey) == 0 {
+			slog.Error("JWT token signing", "errorMessage", err, "JWTSecreteKeyEmpty", len(JWTSecreteKey) == 0)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"errorMessage": errBadCredentials,
 			})
