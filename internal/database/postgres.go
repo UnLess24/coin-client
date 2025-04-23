@@ -17,7 +17,7 @@ type PGDB struct {
 }
 
 func NewPGDB(cfg *config.Config) (*PGDB, error) {
-	dsName := fmt.Sprintf("port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Database, cfg.DB.SslMode)
+	dsName := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Database, cfg.DB.SslMode)
 	db, err := sqlx.Connect(cfg.DB.Name, dsName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
