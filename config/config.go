@@ -28,8 +28,9 @@ type Server struct {
 }
 
 type CoinServerConnect struct {
-	Host string
-	Port string
+	Schema string
+	Host   string
+	Port   string
 }
 
 func MustRead() *Config {
@@ -59,8 +60,9 @@ func MustRead() *Config {
 		MigrationsPath: viper.GetString("migrations.path"),
 		JWTSecretKey:   viper.GetString("jwt.secret"),
 		CoinServer: CoinServerConnect{
-			Host: viper.GetString("coin-server-connect.host"),
-			Port: viper.GetString("coin-server-connect.port"),
+			Schema: viper.GetString("coin-server-connect.schema"),
+			Host:   viper.GetString("coin-server-connect.host"),
+			Port:   viper.GetString("coin-server-connect.port"),
 		},
 	}
 }
