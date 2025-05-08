@@ -31,6 +31,7 @@ type CoinServerConnect struct {
 	Schema string
 	Host   string
 	Port   string
+	Type   string
 }
 
 func MustRead() *Config {
@@ -63,6 +64,7 @@ func MustRead() *Config {
 			Schema: viper.GetString("coin-server-connect.schema"),
 			Host:   viper.GetString("coin-server-connect.host"),
 			Port:   viper.GetString("coin-server-connect.port"),
+			Type:   viper.GetString("coin-server-connect.type"),
 		},
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/UnLess24/coin/client/config"
 	"github.com/UnLess24/coin/client/internal/database"
 	"github.com/UnLess24/coin/client/internal/server"
+	coinserver "github.com/UnLess24/coin/client/internal/server/coin_server"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -35,7 +36,16 @@ func main() {
 		return
 	}
 	defer db.Close()
-	srv := server.New(fmt.Sprintf("%v:%v", cfg.Server.Host, cfg.Server.Port), db, cfg)
+
+	coinSrv, err := coinserver.New(cfg.CoinServer.Schema, cfg.CoinServer.Host, cfg.CoinServer.Port, cfg.CoinServer.Type)
+	if err != nil {
+		slog.Error("failed to create coin server", "error", err)
+		return
+	}
+	defer coinSrv.Close()
+
+	srv := server.New(fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port), db, coinSrv, cfg)
+	defer srv.Close()
 
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
