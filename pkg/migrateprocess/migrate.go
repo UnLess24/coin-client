@@ -20,12 +20,12 @@ func MustProcess(args []string, cfg *config.Config) {
 
 	url := URLConnectToDB(cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Database, cfg.DB.SslMode)
 	db := mustNewDB(cfg.DB.Name, url)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	driver := mustDBDriver(db)
 
 	m := mustMigrate(cfg.DB.Name, cfg.MigrationsPath, driver)
-	defer m.Close()
+	defer func() { _, _ = m.Close() }()
 
 	var err error
 	if mCount == 0 {

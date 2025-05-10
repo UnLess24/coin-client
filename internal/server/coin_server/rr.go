@@ -18,7 +18,7 @@ func (s *httpCoinServer) response(ctx context.Context, url string) ([]byte, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to get response url: %s, err: %w", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to get response url: %s, status code: %d", url, resp.StatusCode)

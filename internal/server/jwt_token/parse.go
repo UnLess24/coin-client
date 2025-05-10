@@ -10,10 +10,10 @@ import (
 func Parse(bearerToken string, JWTSecretKey []byte) error {
 	jwtToken := bearerToken[len("Bearer "):]
 
-	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			slog.Error("token verification", "errorMessage", "Unexpected signing method")
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
 		return JWTSecretKey, nil

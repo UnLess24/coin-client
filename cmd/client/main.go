@@ -35,17 +35,17 @@ func main() {
 		slog.Error("failed to connect to database", "error", err)
 		return
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	coinSrv, err := coinserver.New(cfg.CoinServer.Schema, cfg.CoinServer.Host, cfg.CoinServer.Port, cfg.CoinServer.Type)
 	if err != nil {
 		slog.Error("failed to create coin server", "error", err)
 		return
 	}
-	defer coinSrv.Close()
+	defer func() { _ = coinSrv.Close() }()
 
 	srv := server.New(fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port), db, coinSrv, cfg)
-	defer srv.Close()
+	defer func() { _ = srv.Close() }()
 
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
