@@ -34,10 +34,19 @@ type CoinServerConnect struct {
 	Type   string
 }
 
-func MustRead() *Config {
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	viper.SetConfigType("yaml")
+func MustRead(opts ...Option) *Config {
+	options := &options{
+		configName: "config",
+		configPath: ".",
+		configType: "yaml",
+	}
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	viper.SetConfigName(options.configName)
+	viper.AddConfigPath(options.configPath)
+	viper.SetConfigType(options.configType)
 
 	err := viper.ReadInConfig()
 	if err != nil {
