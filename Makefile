@@ -1,5 +1,5 @@
 .SILENT:
-.PHONY: create up down lint
+.PHONY: create up down lint swag
 
 up:
 	docker network create --driver bridge coinclientserver &> /dev/null || true
@@ -14,3 +14,6 @@ create:
 
 lint:
 	golangci-lint run ./...
+
+swag:
+	swag init -g ./cmd/client/main.go -o cmd/docs

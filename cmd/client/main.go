@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/UnLess24/coin/client/cmd/docs"
+
 	"github.com/UnLess24/coin/client/config"
 	"github.com/UnLess24/coin/client/internal/database"
 	"github.com/UnLess24/coin/client/internal/server"
