@@ -4,6 +4,7 @@
 - print **make down** - to finish project and remove all tmp containers and images
 - print **make lint** - to easy linting project by golangci-lint
 - print **make create n=$nameOfMigration** - to create migration
+- print **make swag** - to generate swagger docs
 
 ## Migrations commands
 
