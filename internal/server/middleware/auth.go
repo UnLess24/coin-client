@@ -7,18 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type AuthMiddlewareError struct {
+	Error string `json:"error"`
+}
+
 func Auth(JWTSecretKey []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		bearerToken := c.GetHeader("Authorization")
 		if bearerToken == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization required"})
+			c.JSON(http.StatusUnauthorized, AuthMiddlewareError{Error: "authorization required"})
 			c.Abort()
 			return
 		}
 
 		err := jwttoken.Parse(bearerToken, JWTSecretKey)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.JSON(http.StatusUnauthorized, AuthMiddlewareError{Error: "invalid token"})
 			c.Abort()
 			return
 		}

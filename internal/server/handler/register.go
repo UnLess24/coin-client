@@ -17,20 +17,27 @@ var (
 	invalidEmail   = "invalid email"
 )
 
+// Register godoc
+// @Summary регистрация пользователя
+// @Schemes
+// @Description выполняет регистрацию
+// @Tags Регистрация и авторизация
+// @Param request body dto.RegisterRequest true "request"
+// @Accept json
+// @Produce json
+// @Success 201
+// @Failure 400 {object} dto.ResponseError
+// @Router /register [post]
 func Register(db database.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := dto.RegisterRequest{}
 		if err := c.BindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"errorMessage": invalidRequest,
-			})
+			c.JSON(http.StatusBadRequest, dto.ResponseError{ErrorMessage: invalidRequest})
 			return
 		}
 
 		if _, err := mail.ParseAddress(req.Email); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"errorMessage": invalidEmail,
-			})
+			c.JSON(http.StatusBadRequest, dto.ResponseError{ErrorMessage: invalidRequest})
 			return
 		}
 
@@ -38,9 +45,7 @@ func Register(db database.DB) gin.HandlerFunc {
 		defer cancel()
 		err := db.CreateUser(ctx, user.FromRegisterRequest(req))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"errorMessage": err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, dto.ResponseError{ErrorMessage: err.Error()})
 			return
 		}
 

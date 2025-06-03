@@ -10,10 +10,12 @@ import (
 // @Summary проверка работоспособности сервиса
 // @Schemes
 // @Description do check service
-// @Tags example
-// @Accept json
-// @Produce json
-// @Success 200 {string} OK
+// @Tags HealthCheck
+// @Accept plain
+// @Produce plain
+// @Success 200 string OK
+// @Failure 400
+// @Failure 500
 // @Router /healthcheck [get]
 func HealthCheck(c *gin.Context) {
 	c.String(http.StatusOK, "OK")

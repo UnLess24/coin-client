@@ -1,19 +1,200 @@
+definitions:
+  coinserver.Currency:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      quote:
+        $ref: '#/definitions/coinserver.CurrencyQuote'
+      symbol:
+        type: string
+    type: object
+  coinserver.CurrencyQuote:
+    additionalProperties:
+      $ref: '#/definitions/coinserver.Quote'
+    type: object
+  coinserver.Quote:
+    properties:
+      last_updated:
+        type: string
+      price:
+        type: number
+    type: object
+  coinserver.QuoteResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/coinserver.Quote'
+        type: array
+      name:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.LoginResponse:
+    properties:
+      access_token:
+        type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.ResponseError:
+    properties:
+      error_message:
+        type: string
+    type: object
+  middleware.AuthMiddlewareError:
+    properties:
+      error:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /healthcheck:
+  /api/currencies:
     get:
       consumes:
       - application/json
-      description: do check service
+      description: возвращает список валют
+      parameters:
+      - description: Authorization Bearer header
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
+            items:
+              $ref: '#/definitions/coinserver.Currency'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.AuthMiddlewareError'
+      summary: список валют
+      tags:
+      - Валюты
+  /api/currency:
+    get:
+      consumes:
+      - application/json
+      description: возвращает информацию о конкретной валюте
+      parameters:
+      - description: Authorization Bearer header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: наименование валюты
+        in: query
+        name: currency
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/coinserver.QuoteResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.AuthMiddlewareError'
+      summary: информация о конкретной валюте
+      tags:
+      - Валюты
+  /healthcheck:
+    get:
+      consumes:
+      - text/plain
+      description: do check service
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
             type: string
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
       summary: проверка работоспособности сервиса
       tags:
-      - example
+      - HealthCheck
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: выполняет авторизацию
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ResponseError'
+      summary: авторизация пользователя
+      tags:
+      - Регистрация и авторизация
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: выполняет регистрацию
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ResponseError'
+      summary: регистрация пользователя
+      tags:
+      - Регистрация и авторизация
 swagger: "2.0"
